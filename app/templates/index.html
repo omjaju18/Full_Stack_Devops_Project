@@ -1,117 +1,164 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPL Team Voter</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 20px;
-            background: #f4f4f4;
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 30px 20px;
         }
-
-```
-    h1 {
-        text-align: center;
-    }
-
-    .team-card {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: white;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    button {
-        padding: 8px 16px;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-        background-color: #007bff;
-        color: white;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    .votes {
-        font-weight: bold;
-        color: green;
-    }
-</style>
-```
-
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5rem; color: #f5a623; letter-spacing: 2px; }
+        .header p { color: #aaa; margin-top: 8px; font-size: 1rem; }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 16px 32px;
+            text-align: center;
+        }
+        .stat-box .label { font-size: 0.8rem; color: #aaa; margin-bottom: 4px; }
+        .stat-box .value { font-size: 1.4rem; font-weight: 700; color: #f5a623; }
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .team-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .team-card:hover { transform: translateY(-3px); border-color: #f5a623; }
+        .team-card.leader { border-color: #f5a623; background: #1f1a0e; }
+        .team-info { flex: 1; }
+        .team-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+        .vote-bar-bg {
+            background: #2a2a4a;
+            border-radius: 10px;
+            height: 6px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .vote-bar {
+            background: #f5a623;
+            height: 6px;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        .vote-count { font-size: 0.82rem; color: #f5a623; margin-top: 6px; font-weight: 500; }
+        .vote-btn {
+            background: #f5a623;
+            color: #0a0a1a;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-left: 16px;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+        .vote-btn:hover { background: #e6951a; }
+        .vote-btn:active { transform: scale(0.96); }
+        .trophy { font-size: 0.85rem; margin-left: 6px; }
+        .pod-info {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            color: #444;
+        }
+    </style>
 </head>
 <body>
 
-```
-<h1>🏏 IPL Team Voting App</h1>
+<div class="header">
+    <h1>🏏 IPL Team Voter</h1>
+    <p>Vote for your favourite team — results persist across restarts</p>
+</div>
 
-<div id="teams"></div>
+<div class="stats">
+    <div class="stat-box">
+        <div class="label">Total Votes</div>
+        <div class="value" id="total-votes">0</div>
+    </div>
+    <div class="stat-box">
+        <div class="label">Current Leader</div>
+        <div class="value" id="leader">-</div>
+    </div>
+</div>
+
+<div class="teams-grid" id="teams"></div>
+<div class="pod-info" id="pod-info"></div>
 
 <script>
-    const teams = [
-        "Mumbai Indians",
-        "Chennai Super Kings",
-        "Royal Challengers Bengaluru",
-        "Kolkata Knight Riders",
-        "Delhi Capitals",
-        "Rajasthan Royals",
-        "Sunrisers Hyderabad",
-        "Punjab Kings",
-        "Lucknow Super Giants",
-        "Gujarat Titans"
-    ];
-
     async function loadResults() {
-        const response = await fetch('/results');
-        const data = await response.json();
+        const [resResults, resHome] = await Promise.all([
+            fetch('/results'),
+            fetch('/')
+        ]);
+        const data = await resResults.json();
+        const home = await resHome.json();
 
-        const voteMap = {};
-        data.leaderboard.forEach(team => {
-            voteMap[team.team] = team.votes;
-        });
+        const total = data.leaderboard.reduce((s, t) => s + t.votes, 0);
+        document.getElementById('total-votes').textContent = total;
+        document.getElementById('leader').textContent =
+            total > 0 ? data.winner : 'No votes yet';
+        document.getElementById('pod-info').textContent =
+            `Pod: ${home.pod} | Version: ${home.version}`;
 
         const container = document.getElementById('teams');
         container.innerHTML = '';
 
-        teams.forEach(team => {
+        data.leaderboard.forEach((team, idx) => {
+            const pct = total > 0 ? ((team.votes / total) * 100).toFixed(1) : 0;
+            const slug = team.team.toLowerCase().replaceAll(' ', '-');
+            const isLeader = idx === 0 && team.votes > 0;
             container.innerHTML += `
-                <div class="team-card">
-                    <div>
-                        <h3>${team}</h3>
-                        <span class="votes">Votes: ${voteMap[team] || 0}</span>
+                <div class="team-card ${isLeader ? 'leader' : ''}">
+                    <div class="team-info">
+                        <div class="team-name">
+                            ${isLeader ? '🏆 ' : ''}${team.team}
+                        </div>
+                        <div class="vote-bar-bg">
+                            <div class="vote-bar" style="width:${pct}%"></div>
+                        </div>
+                        <div class="vote-count">${team.votes} votes &nbsp;|&nbsp; ${pct}%</div>
                     </div>
-                    <button onclick="voteTeam('${team}')">
-                        Vote
-                    </button>
-                </div>
-            `;
+                    <button class="vote-btn" onclick="voteTeam('${slug}')">Vote</button>
+                </div>`;
         });
     }
 
-    async function voteTeam(team) {
-        const teamSlug = team.toLowerCase().replaceAll(' ', '-');
-
-        await fetch(`/vote/${teamSlug}`, {
-            method: 'POST'
-        });
-
+    async function voteTeam(slug) {
+        await fetch(`/vote/${slug}`, { method: 'POST' });
         loadResults();
     }
 
     loadResults();
+    setInterval(loadResults, 10000);
 </script>
-```
-
 </body>
 </html>

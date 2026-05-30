@@ -1,25 +1,61 @@
 from flask import Flask, jsonify, render_template
-import socket
+from prometheus_flask_exporter import PrometheusMetrics
+import sqlite3
 import os
+import socket
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
-# In-memory vote store (resets on restart — we'll add persistence later)
-votes = {
-    "Mumbai Indians": 0,
-    "Chennai Super Kings": 0,
-    "Royal Challengers Bengaluru": 0,
-    "Kolkata Knight Riders": 0,
-    "Delhi Capitals": 0,
-    "Rajasthan Royals": 0,
-    "Sunrisers Hyderabad": 0,
-    "Punjab Kings": 0,
-    "Lucknow Super Giants": 0,
-    "Gujarat Titans": 0
-}
+DB_PATH = os.getenv("DB_PATH", "votes.db")
+
+TEAMS = [
+    "Mumbai Indians",
+    "Chennai Super Kings",
+    "Royal Challengers Bengaluru",
+    "Kolkata Knight Riders",
+    "Delhi Capitals",
+    "Rajasthan Royals",
+    "Sunrisers Hyderabad",
+    "Punjab Kings",
+    "Lucknow Super Giants",
+    "Gujarat Titans"
+]
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS votes (
+            team TEXT PRIMARY KEY,
+            count INTEGER DEFAULT 0
+        )
+    ''')
+    for team in TEAMS:
+        c.execute("INSERT OR IGNORE INTO votes (team, count) VALUES (?, 0)", (team,))
+    conn.commit()
+    conn.close()
+
+def get_votes():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT team, count FROM votes ORDER BY count DESC")
+    rows = c.fetchall()
+    conn.close()
+    return {row[0]: row[1] for row in rows}
+
+def increment_vote(team_name):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE votes SET count = count + 1 WHERE team = ?", (team_name,))
+    conn.commit()
+    conn.close()
+
+init_db()
 
 @app.route("/")
 def home():
+    votes = get_votes()
     return jsonify({
         "app": "IPL Team Voter",
         "pod": socket.gethostname(),
@@ -30,24 +66,27 @@ def home():
 
 @app.route("/vote/<team_name>", methods=["POST"])
 def vote(team_name):
+    votes = get_votes()
     matched = next((t for t in votes if t.lower().replace(" ", "-") == team_name.lower()), None)
     if not matched:
         return jsonify({"error": f"Team '{team_name}' not found", "valid_teams": list(votes.keys())}), 404
-    votes[matched] += 1
-    return jsonify({"message": f"Vote cast for {matched}!", "total_votes_for_team": votes[matched]}), 200
-
-@app.route("/ui")
-def ui():
-    return render_template("index.html")
+    increment_vote(matched)
+    updated = get_votes()
+    return jsonify({"message": f"Vote cast for {matched}!", "total_votes_for_team": updated[matched]}), 200
 
 @app.route("/results")
 def results():
+    votes = get_votes()
     sorted_teams = sorted(votes.items(), key=lambda x: x[1], reverse=True)
     winner = sorted_teams[0][0] if sorted_teams[0][1] > 0 else "No votes yet!"
     return jsonify({
         "winner": winner,
         "leaderboard": [{"team": t, "votes": v} for t, v in sorted_teams]
     })
+
+@app.route("/ui")
+def ui():
+    return render_template("index.html")
 
 @app.route("/health")
 def health():
