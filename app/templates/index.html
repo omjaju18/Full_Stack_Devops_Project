@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL Team Voter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+```
+    h1 {
+        text-align: center;
+    }
+
+    .team-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    button {
+        padding: 8px 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .votes {
+        font-weight: bold;
+        color: green;
+    }
+</style>
+```
+
+</head>
+<body>
+
+```
+<h1>🏏 IPL Team Voting App</h1>
+
+<div id="teams"></div>
+
+<script>
+    const teams = [
+        "Mumbai Indians",
+        "Chennai Super Kings",
+        "Royal Challengers Bengaluru",
+        "Kolkata Knight Riders",
+        "Delhi Capitals",
+        "Rajasthan Royals",
+        "Sunrisers Hyderabad",
+        "Punjab Kings",
+        "Lucknow Super Giants",
+        "Gujarat Titans"
+    ];
+
+    async function loadResults() {
+        const response = await fetch('/results');
+        const data = await response.json();
+
+        const voteMap = {};
+        data.leaderboard.forEach(team => {
+            voteMap[team.team] = team.votes;
+        });
+
+        const container = document.getElementById('teams');
+        container.innerHTML = '';
+
+        teams.forEach(team => {
+            container.innerHTML += `
+                <div class="team-card">
+                    <div>
+                        <h3>${team}</h3>
+                        <span class="votes">Votes: ${voteMap[team] || 0}</span>
+                    </div>
+                    <button onclick="voteTeam('${team}')">
+                        Vote
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    async function voteTeam(team) {
+        const teamSlug = team.toLowerCase().replaceAll(' ', '-');
+
+        await fetch(`/vote/${teamSlug}`, {
+            method: 'POST'
+        });
+
+        loadResults();
+    }
+
+    loadResults();
+</script>
+```
+
+</body>
+</html>

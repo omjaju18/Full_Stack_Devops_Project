@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import socket
 import os
 
@@ -35,6 +35,10 @@ def vote(team_name):
         return jsonify({"error": f"Team '{team_name}' not found", "valid_teams": list(votes.keys())}), 404
     votes[matched] += 1
     return jsonify({"message": f"Vote cast for {matched}!", "total_votes_for_team": votes[matched]}), 200
+
+@app.route("/ui")
+def ui():
+    return render_template("index.html")
 
 @app.route("/results")
 def results():
