@@ -4,6 +4,7 @@ import sqlite3
 import os
 import socket
 
+
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 
@@ -22,6 +23,7 @@ TEAMS = [
     "Gujarat Titans"
 ]
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -36,6 +38,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def get_votes():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -44,6 +47,7 @@ def get_votes():
     conn.close()
     return {row[0]: row[1] for row in rows}
 
+
 def increment_vote(team_name):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -51,7 +55,9 @@ def increment_vote(team_name):
     conn.commit()
     conn.close()
 
+
 init_db()
+
 
 @app.route("/")
 def home():
@@ -64,6 +70,7 @@ def home():
         "teams": list(votes.keys())
     })
 
+
 @app.route("/vote/<team_name>", methods=["POST"])
 def vote(team_name):
     votes = get_votes()
@@ -73,6 +80,7 @@ def vote(team_name):
     increment_vote(matched)
     updated = get_votes()
     return jsonify({"message": f"Vote cast for {matched}!", "total_votes_for_team": updated[matched]}), 200
+
 
 @app.route("/results")
 def results():
@@ -84,17 +92,21 @@ def results():
         "leaderboard": [{"team": t, "votes": v} for t, v in sorted_teams]
     })
 
+
 @app.route("/ui")
 def ui():
     return render_template("index.html")
+
 
 @app.route("/health")
 def health():
     return jsonify({"status": "ok"}), 200
 
+
 @app.route("/ready")
 def ready():
     return jsonify({"status": "ready"}), 200
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
