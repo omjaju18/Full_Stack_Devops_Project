@@ -11,10 +11,6 @@ spec:
       {{- include "ipl-voter.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
         {{- include "ipl-voter.selectorLabels" . | nindent 8 }}
     spec:
@@ -25,17 +21,27 @@ spec:
           ports:
             - containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
+          env:
+            - name: DB_PATH
+              value: /data/votes.db
+          volumeMounts:
+            - name: votes-storage
+              mountPath: /data
           livenessProbe:
             httpGet:
-                path: /health 
-                port: {{ .Values.service.targetPort }}
+              path: /health
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-                path: /ready  
-                port: {{ .Values.service.targetPort }}
+              path: /ready
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 5
             periodSeconds: 5
-
-            
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: votes-storage
+          persistentVolumeClaim:
+            claimName: {{ include "ipl-voter.fullname" . }}-pvc
