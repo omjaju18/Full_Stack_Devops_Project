@@ -90,14 +90,8 @@ jobs:
       - name: Helm lint
         run: helm lint k8/helm/ipl-voter/
 
-      - name: Install helm-diff plugin
-        run: helm plugin install https://github.com/databus23/helm-diff
-
-      - name: Helm diff
-        run: |
-          helm diff upgrade ipl-voter k8/helm/ipl-voter/ \
-            --allow-unreleased \
-            || true
+      - name: Helm template validation
+        run: helm template ipl-voter k8/helm/ipl-voter/ > /dev/null
 
   update-image-tag:
     runs-on: ubuntu-latest
