@@ -1,0 +1,122 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt
+
+      - name: Run linting
+        run: |
+          pip install flake8
+          flake8 app/ --max-line-length=120 --exclude=app/tests/
+
+      - name: Run tests
+        run: |
+          pip install pytest pytest-cov
+          pytest app/tests/ -v --cov=app --cov-report=term-missing
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          push: true
+          tags: |
+            omjaju18/ipl-voter:latest
+            omjaju18/ipl-voter:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  
+  security:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: omjaju18/ipl-voter:${{ github.sha }}
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
+  helm-validate:
+    runs-on: ubuntu-latest
+    needs: security
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.19.0
+
+      - name: Helm lint
+        run: helm lint k8/helm/ipl-voter/
+
+      - name: Install helm-diff plugin
+        run: helm plugin install https://github.com/databus23/helm-diff
+
+      - name: Helm diff
+        run: |
+          helm diff upgrade ipl-voter k8/helm/ipl-voter/ \
+            --allow-unreleased \
+            || true
+    
+  update-image-tag:
+    runs-on: ubuntu-latest
+    needs:  helm-validate
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image tag in values.yaml
+        run: |
+          sed -i "s|tag: \".*\"|tag: \"${{ github.sha }}\"|g" k8/helm/ipl-voter/values.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "omjaju18"
+          git config --global user.email "omjaju03@gmail.com"
+          git add k8/helm/ipl-voter/values.yaml
+          git commit -m "chore(cd): update image tag to ${{ github.sha }}"
+          git push origin HEAD:${{ github.ref }}
