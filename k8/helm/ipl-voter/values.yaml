@@ -1,6 +1,6 @@
 image:
   repository: omjaju18/ipl-voter
-  tag: "25f35d06518d7f8bb41b6ecea839bcbc4772cc3f"
+  tag: "19a67c17aeff25d6695cce01a152785c8adc2d14"
   pullPolicy: IfNotPresent
 
 replicaCount: 1
