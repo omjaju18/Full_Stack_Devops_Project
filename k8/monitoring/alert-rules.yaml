@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ipl-voter-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: ipl-voter.rules
+      rules:
+
+        - alert: HighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{namespace="default", pod=~"ipl-voter.*"}[5m]) > 0.008
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU - IPL Voter"
+            description: "CPU usage is high for more than 1 minute"
+
+        - alert: HighMemoryUsage
+          expr: container_memory_working_set_bytes{namespace="default", pod=~"ipl-voter.*"} > 1000
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Memory - IPL Voter"
+            description: "Memory usage above 90MB for more than 1 minute"
+
+        - alert: PodNotReady
+          expr: kube_pod_status_ready{namespace="default", condition="true"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod Down - IPL Voter"
+            description: "Pod {{ $labels.pod }} is not ready"

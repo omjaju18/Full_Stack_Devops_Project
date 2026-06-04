@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: ipl-voter-alertmanager-config
+  namespace: monitoring
+spec:
+  route:
+    receiver: 'email-alert'
+    groupBy: ['alertname']
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 1h
+
+  receivers:
+    - name: 'email-alert'
+      emailConfigs:
+        - to: 'omjaju03@gmail.com'        
+          from: 'omjaju03@gmail.com'      
+          smarthost: 'smtp.gmail.com:587'
+          authUsername: 'omjaju03@gmail.com'
+          authPassword:
+            name: alertmanager-email-secret  
+            key: password
+          requireTLS: true
+          sendResolved: true
