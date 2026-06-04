@@ -20,7 +20,7 @@ spec:
             description: "CPU usage is high for more than 1 minute"
 
         - alert: HighMemoryUsage
-          expr: container_memory_working_set_bytes{namespace="default", pod=~"ipl-voter.*"} > 1000
+          expr: container_memory_working_set_bytes{namespace="default", pod=~"ipl-voter.*"} > 200000
           for: 1m
           labels:
             severity: warning
