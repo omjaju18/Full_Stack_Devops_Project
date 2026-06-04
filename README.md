@@ -122,7 +122,7 @@ Full-Stack-Devops-Project/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                # GitHub Actions CI/CD pipeline
+│       └── cicd.yaml                # GitHub Actions CI/CD pipeline
 │
 ├── .gitignore
 └── README.md
