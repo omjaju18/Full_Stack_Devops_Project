@@ -1,6 +1,6 @@
 # 🏏 Full Stack DevOps Project — IPL Team Voter
 
-![CI Pipeline](https://github.com/omjaju18/Full_Stack_Devops-Project/actions/workflows/ci.yml/badge.svg)
+![CI Pipeline](https://github.com/omjaju18/Full_Stack_Devops_Project/actions/workflows/ci.yml/badge.svg)
 ![Docker](https://img.shields.io/badge/Docker-omjaju18%2Fipl--voter-blue?logo=docker)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Minikube-326CE5?logo=kubernetes)
 ![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD-orange?logo=argo)
