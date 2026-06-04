@@ -122,7 +122,7 @@ Full-Stack-Devops-Project/
 │
 ├── .github/
 │   └── workflows/
-│       └── cicd.yaml                # GitHub Actions CI/CD pipeline
+│       └── cicd.yaml             # GitHub Actions CI/CD pipeline
 │
 ├── .gitignore
 └── README.md
@@ -140,7 +140,9 @@ Full-Stack-Devops-Project/
 - Live leaderboard with vote percentage bars
 - Routes: `/`, `/ui`, `/vote/<team>`, `/results`, `/health`, `/ready`, `/metrics`
 
-![App UI] <img width="677" height="371" alt="newui" src="https://github.com/user-attachments/assets/192a5a2e-b3d2-48fc-8080-b2ddf290357f" />
+**App UI — IPL Team Voter**
+
+<img width="677" height="371" alt="newui" src="https://github.com/user-attachments/assets/192a5a2e-b3d2-48fc-8080-b2ddf290357f" />
 
 
 ---
@@ -152,8 +154,9 @@ Full-Stack-Devops-Project/
 - Gunicorn production server
 - Image: `omjaju18/ipl-voter:latest`
 
-![Docker Hub]<img width="709" height="303" alt="docker imahge" src="https://github.com/user-attachments/assets/0db903b8-d61d-4ede-9f0f-24f3ec46a81d" />
+**Docker Hub — Image Tags**
 
+<img width="709" height="303" alt="docker_image" src="https://github.com/user-attachments/assets/0db903b8-d61d-4ede-9f0f-24f3ec46a81d" />
 
 ---
 
@@ -163,8 +166,9 @@ Full-Stack-Devops-Project/
 - Auto build + push to Docker Hub
 - Tags: `:latest` + `:commit-sha`
 
-![CI Pipeline]<img width="958" height="359" alt="ci pipeline" src="https://github.com/user-attachments/assets/3cf4b98d-0e75-45a7-92f6-dae675a55200" />
+**CI Pipeline — GitHub Actions**
 
+<img width="958" height="359" alt="ci_pipeline" src="https://github.com/user-attachments/assets/3cf4b98d-0e75-45a7-92f6-dae675a55200" />
 
 ---
 
@@ -176,10 +180,13 @@ Full-Stack-Devops-Project/
 - Resource limits: CPU `500m`, Memory `256Mi`
 - Deployed to Minikube — 2 pods running
 
-![Helm]<img width="563" height="147" alt="helm" src="https://github.com/user-attachments/assets/61e6359a-cd5c-413f-838d-3a20f898e03e" />
+**Helm Install + Lint**
 
-![K8s Pods]<img width="665" height="302" alt="k8final" src="https://github.com/user-attachments/assets/594cc45a-db30-46af-b654-ceea249c37c2" />
+<img width="563" height="147" alt="helm" src="https://github.com/user-attachments/assets/61e6359a-cd5c-413f-838d-3a20f898e03e" />
 
+**Kubernetes Pods Running**
+
+<img width="665" height="302" alt="k8final" src="https://github.com/user-attachments/assets/594cc45a-db30-46af-b654-ceea249c37c2" />
 
 ---
 
@@ -191,7 +198,10 @@ Full-Stack-Devops-Project/
 - `selfHeal: true` — drift auto-corrected
 - `prune: true` — removed resources cleaned up
 
-![ArgoCD]<img width="959" height="453" alt="argocdui" src="https://github.com/user-attachments/assets/5a2a323b-4166-41ca-87ab-9d0dcec84120" />
+**ArgoCD — Synced to HEAD**
+
+<img width="959" height="453" alt="argocdui" src="https://github.com/user-attachments/assets/5a2a323b-4166-41ca-87ab-9d0dcec84120" />
+
 
 
 ---
@@ -204,11 +214,16 @@ Full-Stack-Devops-Project/
 - `helm-validate` job → helm lint + helm diff
 - `update-image-tag` job → updates `values.yaml`, triggers ArgoCD
 - `notify` job → Email notification on success/failure
+- 
+**CI/CD Pipeline — All Jobs Passing**
+  
+<img width="956" height="319" alt="cicd" src="https://github.com/user-attachments/assets/ad432288-bbf4-42c6-a6d8-1cfc2106439a" />
 
-![CI/CD]<img width="956" height="319" alt="cicd" src="https://github.com/user-attachments/assets/ad432288-bbf4-42c6-a6d8-1cfc2106439a" />
 
-![Email Notify]<img width="743" height="290" alt="email" src="https://github.com/user-attachments/assets/522db835-42df-4f60-a613-c136528069a5" />
+**Email Notification — Pipeline Success**
 
+
+<img width="743" height="290" alt="email" src="https://github.com/user-attachments/assets/522db835-42df-4f60-a613-c136528069a5" />
 
 ---
 
@@ -220,16 +235,34 @@ Full-Stack-Devops-Project/
 - Alertmanager with Gmail SMTP email alerts
 - 3 alert rules: `HighCPUUsage`, `HighMemoryUsage`, `PodNotReady`
 
-![Grafana Dashboard]<img width="959" height="364" alt="grafana" src="https://github.com/user-attachments/assets/bd395ef3-4742-474c-92e3-f806b26ead5a" />
+**Grafana Dashboard — Live Metrics**
 
-![Prometheus Metrics]<img width="955" height="386" alt="metrics" src="https://github.com/user-attachments/assets/089fd9fb-1056-4f22-88ed-714cd075f91b" />
 
-![Alert Rules]<img width="958" height="441" alt="alerts" src="https://github.com/user-attachments/assets/b571c47c-be5d-4931-b81c-ec053a8971f5" />
+<img width="959" height="364" alt="grafana" src="https://github.com/user-attachments/assets/bd395ef3-4742-474c-92e3-f806b26ead5a" />
 
-![Alert Firing]<img width="958" height="427" alt="alert firing" src="https://github.com/user-attachments/assets/f7d44a04-db75-431c-8d66-b9624000e643" />
 
-![Alert Email]<img width="954" height="404" alt="alert emsil" src="https://github.com/user-attachments/assets/5d26e865-05fb-4938-9ebb-423ad973ea61" />
+**Prometheus — Flask Metrics**
 
+
+<img width="955" height="386" alt="metrics" src="https://github.com/user-attachments/assets/089fd9fb-1056-4f22-88ed-714cd075f91b" />
+
+
+**Alert Rules — Prometheus**
+
+
+<img width="958" height="441" alt="alerts" src="https://github.com/user-attachments/assets/b571c47c-be5d-4931-b81c-ec053a8971f5" />
+
+
+**Alert Firing — HighMemoryUsage**
+
+
+<img width="958" height="427" alt="alert_firing" src="https://github.com/user-attachments/assets/f7d44a04-db75-431c-8d66-b9624000e643" />
+
+
+**Alert Email — Gmail Notification**
+
+
+<img width="954" height="404" alt="alert_email" src="https://github.com/user-attachments/assets/5d26e865-05fb-4938-9ebb-423ad973ea61" />
 
 ---
 
